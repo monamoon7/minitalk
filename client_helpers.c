@@ -6,7 +6,7 @@
 /*   By: mshaghaf <mshaghaf@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/08/17 14:23:03 by mona          #+#    #+#                 */
-/*   Updated: 2025/08/17 14:48:54 by mona          ########   odam.nl         */
+/*   Updated: 2025/08/17 16:08:39 by mona          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,4 +32,21 @@ int	err(const char *s)
 {
 	ft_putstr_fd((char *)s, 2);
 	return (1);
+}
+
+int	parse_pid(char *s, pid_t *out)
+{
+	if (!is_all_digits(s))
+		return (err("Error: bad PID\n"));
+	*out = (pid_t)ft_atoi(s);
+	if (*out <= 0)
+		return (err("Error: bad PID\n"));
+	return (0);
+}
+
+void	init_masks(sigset_t *block, sigset_t *empty)
+{
+	sigemptyset(empty);
+	sigemptyset(block);
+	sigaddset(block, SIGUSR1);
 }

@@ -6,9 +6,11 @@
 /*   By: mshaghaf <mshaghaf@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/07/13 17:58:30 by mona          #+#    #+#                 */
-/*   Updated: 2025/08/17 15:27:04 by mona          ########   odam.nl         */
+/*   Updated: 2025/08/17 16:10:01 by mona          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include "minitalk.h"
 
 #include "minitalk.h"
 
@@ -36,7 +38,7 @@ static int	install_handlers(void)
 	return (0);
 }
 
-void	send_char(pid_t pid, unsigned char c)
+static void	send_char(pid_t pid, unsigned char c, const sigset_t *empty)
 {
 	int	i;
 
@@ -49,32 +51,39 @@ void	send_char(pid_t pid, unsigned char c)
 		else
 			kill(pid, SIGUSR1);
 		while (!g_got_ack)
-			pause();
+			sigsuspend(empty);
 		i--;
 	}
+}
+
+static void	send_str(pid_t pid, const unsigned char *p,
+			const sigset_t *empty)
+{
+	while (*p)
+		send_char(pid, *p++, empty);
+	send_char(pid, '\0', empty);
 }
 
 int	main(int argc, char **argv)
 {
 	pid_t					pid;
 	const unsigned char		*p;
+	sigset_t				block;
+	sigset_t				empty;
 
 	if (argc != 3)
 		return (err("Usage: ./client <server_pid> \"<message>\"\n"));
-	if (!is_all_digits(argv[1]))
-		return (err("Error: bad PID\n"));
-	pid = (pid_t)ft_atoi(argv[1]);
-	if (pid <= 0)
-		return (err("Error: bad PID\n"));
 	if (install_handlers())
 		return (1);
+	if (parse_pid(argv[1], &pid))
+		return (1);
+	init_masks(&block, &empty);
+	sigprocmask(SIG_BLOCK, &block, NULL);
 	p = (const unsigned char *)argv[2];
-	while (*p)
-		send_char(pid, *p++);
-	send_char(pid, '\n');
-	send_char(pid, '\0');
+	send_str(pid, p, &empty);
 	while (!g_eom)
-		pause();
+		sigsuspend(&empty);
+	sigprocmask(SIG_UNBLOCK, &block, NULL);
 	ft_putstr_fd("Delivered\n", 1);
 	return (0);
 }
