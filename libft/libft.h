@@ -6,7 +6,7 @@
 /*   By: mshaghaf <mshaghaf@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2023/10/07 20:24:09 by mona          #+#    #+#                 */
-/*   Updated: 2025/07/11 17:50:38 by mona          ########   odam.nl         */
+/*   Updated: 2025/07/27 18:07:39 by mona          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@
 # include <ctype.h>
 # include <stddef.h>
 # include <limits.h>
-# include <bsd/string.h>
 
 int		ft_atoi(const char *str);
 void	ft_bzero(void *s, size_t n);

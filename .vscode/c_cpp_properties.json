@@ -3,8 +3,6 @@
     {
       "name": "macos-clang-x64",
       "includePath": [
-		"${workspaceFolder}/libft",
-  		"${workspaceFolder}/includes",
         "${workspaceFolder}/**"
       ],
       "compilerPath": "/usr/bin/clang",
