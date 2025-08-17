@@ -1,26 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   minitalk.h                                         :+:    :+:            */
+/*   helpers.c                                          :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: mshaghaf <mshaghaf@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2025/07/30 15:00:44 by mona          #+#    #+#                 */
-/*   Updated: 2025/08/17 13:38:33 by mona          ########   odam.nl         */
+/*   Created: 2025/08/17 13:08:37 by mona          #+#    #+#                 */
+/*   Updated: 2025/08/17 13:08:42 by mona          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MINITALK_H
-# define MINITALK_H
+#include "minitalk.h"
 
-# include <unistd.h>
-# include <signal.h>
-# include "libft/libft.h"
+int	is_all_digits(const char *s)
+{
+	int	i;
 
-/* Protocol mapping: SIGUSR1 = 0, SIGUSR2 = 1, MSB first */
+	if (!s || !s[0])
+		return (0);
+	i = 0;
+	while (s[i])
+	{
+		if (s[i] < '0' || s[i] > '9')
+			return (0);
+		i++;
+	}
+	return (1);
+}
 
-void	send_char(pid_t pid, unsigned char c);
-int		is_all_digits(const char *s);
-int		err(const char *s);
-
-#endif
+int	err(const char *s)
+{
+	ft_putstr_fd((char *)s, 2);
+	return (1);
+}

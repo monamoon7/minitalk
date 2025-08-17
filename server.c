@@ -6,35 +6,44 @@
 /*   By: mshaghaf <mshaghaf@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/07/11 16:39:44 by mona          #+#    #+#                 */
-/*   Updated: 2025/08/17 12:00:36 by mona          ########   odam.nl         */
+/*   Updated: 2025/08/17 12:24:13 by mona          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-static void	signal_handler(int signal, siginfo_t *info, void *ucontext)
+static void	flush_byte(unsigned char *ch, int *bit, pid_t pid)
 {
-	static unsigned char	character = 0;
-	static int				bit_count = 0;
-
-	(void)ucontext;
-
-	character <<= 1; /* make room for the new bit */
-	if (signal == SIGUSR2)
-		character |= 1; /* incoming bit is 1 */
-
-	bit_count++;
-	if (bit_count == 8)
+	if (*ch == '\0')
 	{
-		write(1, &character, 1);
-		character = 0;
-		bit_count = 0;
+		if (pid > 0)
+			kill(pid, SIGUSR2); /* end-of-message ack */
 	}
+	else
+		write(1, ch, 1);
+	*ch = 0;
+	*bit = 0;
+}
 
-	/* ACK: tell the client we're ready for the next bit */
+static void	signal_handler(int sig, siginfo_t *info, void *u)
+{
+	static unsigned char	ch = 0;
+	static int				bit = 0;
+
+	(void)u;
+	ch <<= 1;
+	if (sig == SIGUSR2)
+		ch |= 1;
+	bit++;
+
+	/* per-bit ack first, so client unblocks cleanly */
 	if (info && info->si_pid > 0)
 		kill(info->si_pid, SIGUSR1);
+
+	if (bit == 8)
+		flush_byte(&ch, &bit, info ? info->si_pid : 0);
 }
+
 
 int	main(void)
 {
