@@ -6,7 +6,7 @@
 /*   By: mshaghaf <mshaghaf@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/07/11 16:39:44 by mona          #+#    #+#                 */
-/*   Updated: 2025/08/17 11:50:14 by mona          ########   odam.nl         */
+/*   Updated: 2025/08/17 12:00:36 by mona          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,12 +44,11 @@ int	main(void)
 	pid = getpid();
 	ft_putstr_fd("Server PID: ", 1);
 	ft_putnbr_fd(pid, 1);
-	write (1, "\n", 1);
+	write(1, "\n", 1);
 	
-	sa.sa_flags = SA_SIGINFO;            /* was 0 or SA_RESTART */
-	sa.sa_sigaction = signal_handler;    /* use sigaction field, not sa_handler */
 	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
+	sa.sa_flags = SA_SIGINFO;
+	sa.sa_sigaction = signal_handler;
 	
 	if (sigaction(SIGUSR1, &sa, NULL) == -1 || sigaction(SIGUSR2, &sa, NULL) == -1)
 	{

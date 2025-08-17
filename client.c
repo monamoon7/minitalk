@@ -6,7 +6,7 @@
 /*   By: mshaghaf <mshaghaf@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/07/13 17:58:30 by mona          #+#    #+#                 */
-/*   Updated: 2025/08/17 11:54:05 by mona          ########   odam.nl         */
+/*   Updated: 2025/08/17 11:59:11 by mona          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,16 +43,13 @@ void	send_char(pid_t pid, unsigned char c)
 	i = 7;
 	while (i >= 0)
 	{
-		if ((c >> i) & 1)
-			kill(pid, SIGUSR2);
-		else
-			kill(pid, SIGUSR1);
-
-		/* wait for server ACK */
 		g_got_ack = 0;
+		if ((c >> i) & 1)
+    		kill(pid, SIGUSR2);
+		else
+    		kill(pid, SIGUSR1);
 		while (!g_got_ack)
-			pause();
-
+    		pause();
 		i--;
 	}
 }
