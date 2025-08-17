@@ -2,7 +2,7 @@ NAME_SERVER = server
 NAME_CLIENT = client
 
 SRC_SERVER = server.c
-SRC_CLIENT = client.c client_helpers.c
+SRC_CLIENT = client.c client_helpers.c client_send.c
 OBJ_SERVER = $(SRC_SERVER:.c=.o)
 OBJ_CLIENT = $(SRC_CLIENT:.c=.o)
 

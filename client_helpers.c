@@ -6,7 +6,7 @@
 /*   By: mshaghaf <mshaghaf@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/08/17 14:23:03 by mona          #+#    #+#                 */
-/*   Updated: 2025/08/17 16:08:39 by mona          ########   odam.nl         */
+/*   Updated: 2025/08/17 18:05:02 by mona          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,4 +49,12 @@ void	init_masks(sigset_t *block, sigset_t *empty)
 	sigemptyset(empty);
 	sigemptyset(block);
 	sigaddset(block, SIGUSR1);
+	sigaddset(block, SIGUSR2);
+}
+
+int	wait_for_ack(const sigset_t *empty)
+{
+	while (!g_got_ack)
+		sigsuspend(empty);
+	return (0);
 }
