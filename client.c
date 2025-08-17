@@ -6,7 +6,7 @@
 /*   By: mshaghaf <mshaghaf@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/07/13 17:58:30 by mona          #+#    #+#                 */
-/*   Updated: 2025/08/17 14:17:15 by mona          ########   odam.nl         */
+/*   Updated: 2025/08/17 15:27:04 by mona          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ static int	install_handlers(void)
 	struct sigaction	sa;
 
 	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
+	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = sig_handler;
 	if (sigaction(SIGUSR1, &sa, NULL) == -1
 		|| sigaction(SIGUSR2, &sa, NULL) == -1)
@@ -36,7 +36,6 @@ static int	install_handlers(void)
 	return (0);
 }
 
-/* send bits MSB first to match server: SIGUSR2 = 1, SIGUSR1 = 0 */
 void	send_char(pid_t pid, unsigned char c)
 {
 	int	i;
