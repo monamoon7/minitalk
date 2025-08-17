@@ -6,43 +6,96 @@
 /*   By: mshaghaf <mshaghaf@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/07/13 17:58:30 by mona          #+#    #+#                 */
-/*   Updated: 2025/07/30 14:49:07 by mona          ########   odam.nl         */
+/*   Updated: 2025/08/17 11:54:05 by mona          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <unistd.h>
-#include <signal.h>
-#include <stdlib.h>
-#include "libft/libft.h"
+#include "minitalk.h"
 
+static volatile sig_atomic_t g_got_ack = 0;
+
+static void	ack_handler(int signo)
+{
+	(void)signo;
+	g_got_ack = 1; /* just flip the flag */
+}
+
+static int	install_ack_handler(void)
+{
+	struct sigaction	sa;
+
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = ack_handler;
+	if (sigaction(SIGUSR1, &sa, NULL) == -1)
+	{
+		ft_putstr_fd("sigaction error (client)\n", 2);
+		return (1);
+	}
+	return (0);
+}
+
+/* send bits MSB first to match server: SIGUSR2 = 1, SIGUSR1 = 0 */
 void	send_char(pid_t pid, unsigned char c)
 {
-	int i = 7;
+	int	i;
 
+	i = 7;
 	while (i >= 0)
 	{
-		if ((c >> i) & 1) // if bit at pistion i is 1 
+		if ((c >> i) & 1)
 			kill(pid, SIGUSR2);
 		else
 			kill(pid, SIGUSR1);
-		usleep(100); //tiny delay so server doesn't miss signals
+
+		/* wait for server ACK */
+		g_got_ack = 0;
+		while (!g_got_ack)
+			pause();
+
 		i--;
 	}
 }
 
-int main(int argc, char **argv)
+static int	is_all_digits(const char *s)
 {
-	pid_t	server_pid;
+	int	i;
 
-	if (argc != 2)
+	i = 0;
+	if (!s || !s[0])
+		return (0);
+	while (s[i])
 	{
-		ft_putstr_fd("Usage: ./client <server_pid>\n", 2);
-		return (1);
+		if (s[i] < '0' || s[i] > '9')
+			return (0);
+		i++;
 	}
+	return (1);
+}
 
-	server_pid = (pid_t)atoi(argv[1]);
+int	main(int argc, char **argv)
+{
+	pid_t		pid;
+	const char	*msg;
+	int			i;
 
-	send_char(server_pid, 'A');
-
+	if (argc != 3)
+		return (ft_putstr_fd("Usage: ./client <server_pid> \"<message>\"\n", 2), 1);
+	if (!is_all_digits(argv[1]))
+		return (ft_putstr_fd("Error: bad PID\n", 2), 1);
+	pid = (pid_t)ft_atoi(argv[1]);
+	if (pid <= 0)
+		return (ft_putstr_fd("Error: bad PID\n", 2), 1);
+	if (install_ack_handler())
+		return (1);
+	msg = argv[2];
+	i = 0;
+	while (msg[i])
+	{
+		send_char(pid, (unsigned char)msg[i]);
+		i++;
+	}
+	send_char(pid, '\n');
 	return (0);
 }
+
